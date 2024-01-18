@@ -8,20 +8,10 @@ startx = -100
 starty = -100
 turtle_scale = 1.5
 
-#------ robot commands
-def move():
-  robot.dot(10)
-  robot.fd(50)
-
-def turn_left():
-  robot.speed(0)
-  robot.lt(90)
-  robot.speed(2)
-
 #----- init screen
 wn = trtl.Screen()
 wn.setup(width=screen_w, height=screen_h)
-robot_image = "robot.gif"
+robot_image = "115\\robot.gif"
 wn.addshape(robot_image)
 
 #----- init robot
@@ -36,18 +26,23 @@ robot.goto(startx, starty)
 robot.speed(2)
 robot.showturtle()
 
-#---- TODO: change maze here
-wn.bgpic("maze1.png") # other file names should be maze2.png, maze3.png
+sets = [
+  {'img': "115\maze1.png", 'cmds': [0,0,0,0,1,1,1,1]},
+  {'img': "115\maze2.png", 'cmds': [1,1,1,0,0]},
+  {'img': "115\maze3.png", 'cmds': [1,0,0,1,1,0,0,1]}
+]
 
-#---- TODO: begin robot movement here
-# move robot forward with move()
-# turn robot left with turn_left()
-# sample for loop:
-'''
-for step in range(3): # forward 3
-  move()
-'''
+######################################
+maze = 3 # Set to maze number
+#####################################
 
-#---- end robot movement 
+maze -= 1
+wn.bgpic(sets[maze]['img'])
+commands = sets[maze]['cmds']
+
+for i in commands:
+  robot.dot(10)
+  robot.setheading(i*90)
+  robot.forward(50)
 
 wn.mainloop()
