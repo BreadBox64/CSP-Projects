@@ -8,6 +8,16 @@ startx = -100
 starty = -100
 turtle_scale = 1.5
 
+#------ robot commands
+def move():
+  robot.dot(10)
+  robot.fd(50)
+
+def turn_left():
+  robot.speed(0)
+  robot.lt(90)
+  robot.speed(2)
+
 #----- init screen
 wn = trtl.Screen()
 wn.setup(width=screen_w, height=screen_h)
@@ -28,21 +38,26 @@ robot.showturtle()
 
 sets = [
   {'img': "115\maze1.png", 'cmds': [0,0,0,0,1,1,1,1]},
-  {'img': "115\maze2.png", 'cmds': [1,1,1,0,0]},
+  {'img': "115\maze2.png", 'cmds': [0,0,0,1,1]},
   {'img': "115\maze3.png", 'cmds': [1,0,0,1,1,0,0,1]}
 ]
 
 ######################################
-maze = 3 # Set to maze number
+maze = 2 # Set to maze number
 #####################################
 
 maze -= 1
 wn.bgpic(sets[maze]['img'])
 commands = sets[maze]['cmds']
 
+direction = 0
+
 for i in commands:
-  robot.dot(10)
-  robot.setheading(i*90)
-  robot.forward(50)
+  while i != direction:
+    turn_left()
+    direction -= 1
+    if direction < 0:
+      direction = 3
+  move()
 
 wn.mainloop()
