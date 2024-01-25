@@ -8,6 +8,8 @@ screen.colormode(255)
 # Turtle Inits
 buildingTurtle = Turtle()
 buildingTurtle.pu()
+buildingTurtle.ht()
+buildingTurtle.speed(0)
 
 # Building Aid Functions
 oldBuildingShapeVars = {
@@ -42,21 +44,39 @@ def drawBuildingGrid(buildingGrid):
 	streetWidth = scales[2]
 	halfWidth = buildingWidth/2
 	streetHalfWidth = streetWidth/2
+	buildingTurtle.st()
 
 	for building in grid:
+		# Variable Setup
 		offsetX = ((building[0][0] - building[0][1]) * buildingWidth) + (((building[0][0] - building[0][1]) - 1) * streetWidth)
 		offsetY = ((building[0][0] + building[0][1]) * halfWidth) + ((building[0][0] + building[0][1] - 1) * streetHalfWidth)
 		unitWidthX = (abs(building[0][0] - building[1][0]) + 1)
 		widthX = (unitWidthX * buildingWidth) + ((unitWidthX - 1) * streetWidth)
 		unitWidthZ = (abs(building[0][1] - building[1][1]) + 1)
 		widthZ = (unitWidthZ * buildingWidth) + ((unitWidthZ - 1) * streetWidth)
+		# Draw Floors
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, False, widthX, widthZ, buildingHeight, "#AAAAAA", "#666666")
+		redefineBuildingShape(buildingTurtle, False, widthX, widthZ, buildingHeight, building[3], building[4])
 		for i in range(building[2]):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
-		
+		# Draw Roof
+		buildingTurtle.pencolor(building[4])
+		buildingTurtle.fillcolor(building[3])
+		buildingTurtle.pd()
+		buildingTurtle.begin_fill()
+		turtlePos = buildingTurtle.pos()
+		buildingTurtle.goto(turtlePos[0] + widthZ, turtlePos[1] + (widthZ/2))
+		turtlePos = buildingTurtle.pos()
+		buildingTurtle.goto(turtlePos[0] - widthX, turtlePos[1] + (widthX/2))
+		turtlePos = buildingTurtle.pos()
+		buildingTurtle.goto(turtlePos[0] - widthZ, turtlePos[1] - (widthZ/2))
+		turtlePos = buildingTurtle.pos()
+		buildingTurtle.goto(turtlePos[0] + widthX, turtlePos[1] - (widthX/2))
+		buildingTurtle.end_fill()
+		buildingTurtle.pu()
+	buildingTurtle.ht()
 
 def initBuildingGrid():
 	# 4x4 grid
@@ -65,7 +85,8 @@ def initBuildingGrid():
 	grid = [
 		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0]),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
-		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0])
+		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
+		((0, -2), (-2, -2), 20, wallColors[1], outlineColors[0])
 	]
 	scales = [30, 10, 20]
 	return (grid, scales)
