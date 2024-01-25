@@ -52,10 +52,14 @@ def drawBuildingGrid(buildingGrid):
 		widthZ = (unitWidthZ * buildingWidth) + ((unitWidthZ - 1) * streetWidth)
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, False, widthX, widthZ, buildingHeight, "#AAAAAA", "#666666")
+		redefineBuildingShape(buildingTurtle, False, widthX, widthZ, buildingHeight, building[3], building[4])
 		for i in range(building[2]):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
+		buildingTurtle.color(building[4])
+		buildingTurtle.fillcolor(building[3])
+		buildingTurtle.goto()
+		
 		
 
 def initBuildingGrid():
