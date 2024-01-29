@@ -9,7 +9,7 @@ screen.colormode(255)
 buildingTurtle = Turtle()
 buildingTurtle.pu()
 buildingTurtle.ht()
-buildingTurtle.speed(0)
+#buildingTurtle.speed(0)
 
 # Building Aid Functions
 oldBuildingShapeVars = {
@@ -20,7 +20,7 @@ oldBuildingShapeVars = {
 	"outlineColor": "#666666",
 	"windowColor": False
 }
-def redefineBuildingShape(drawTurtle, usePreviousValues = False, widthX = False, widthZ = False, height = False, wallColor = False, outlineColor = False, windowColor = False):
+def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False, widthX = False, widthZ = False, height = False, wallColor = False, outlineColor = False, windowColor = False):
 	widthX = oldBuildingShapeVars.widthX if (usePreviousValues and not widthX) else (widthX if widthX else 30)
 	widthZ = oldBuildingShapeVars.widthZ if (usePreviousValues and not widthZ) else (widthZ if widthZ else 30)
 	height = oldBuildingShapeVars.height if (usePreviousValues and not height) else (height if height else 10)
@@ -28,13 +28,27 @@ def redefineBuildingShape(drawTurtle, usePreviousValues = False, widthX = False,
 	outlineColor = oldBuildingShapeVars.outlineColor if (usePreviousValues and not outlineColor) else (outlineColor if outlineColor else "#666666")
 	windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not windowColor) else windowColor
 
-	buildingFloor = Shape("compound")
-	halfWidthX = widthX/2
-	halfWidthZ = widthZ/2
-	buildingFloor.addcomponent(((0, 0), (widthZ, halfWidthZ), (widthZ, halfWidthZ + height), (0, height), (-widthX, halfWidthX + height), (-widthX, halfWidthX)), wallColor, outlineColor)
-	buildingFloor.addcomponent(((0, 0), (0, height)), outlineColor, outlineColor)
-	screen.register_shape("buildingFloor", buildingFloor)
-	drawTurtle.shape("buildingFloor")
+	if mode == "floor":
+		buildingFloor = Shape("compound")
+		halfWidthX = widthX/2
+		halfWidthZ = widthZ/2
+		buildingFloor.addcomponent(((0, 0), (widthZ, halfWidthZ), (widthZ, halfWidthZ + height), (0, height), (-widthX, halfWidthX + height), (-widthX, halfWidthX)), wallColor, outlineColor)
+		buildingFloor.addcomponent(((0, 0), (0, height)), outlineColor, outlineColor)
+		screen.register_shape("buildingFloor", buildingFloor)
+		drawTurtle.shape("buildingFloor")
+		return 0
+	elif mode == "roof":
+		buildingRoof = Shape("compound")
+		halfWidthX = widthX/2
+		halfWidthZ = widthZ/2
+		buildingRoof.addcomponent(((0, 0), (widthZ, halfWidthZ), (widthZ - widthX, halfWidthX + halfWidthZ), (-widthX, halfWidthX)), wallColor, outlineColor)
+		screen.register_shape("buildingRoof", buildingRoof)
+		drawTurtle.shape("buildingRoof")
+		return 0
+	elif mode == "window":
+		buildingWindow = Shape("compound")
+		
+		return 0
 
 def drawBuildingGrid(buildingGrid):
 	grid = buildingGrid[0]
@@ -57,36 +71,25 @@ def drawBuildingGrid(buildingGrid):
 		# Draw Floors
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, False, widthX, widthZ, buildingHeight, building[3], building[4])
+		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, building[3], building[4], building[5])
 		for i in range(building[2]):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
 		# Draw Roof
-		buildingTurtle.pencolor(building[4])
-		buildingTurtle.fillcolor(building[3])
-		buildingTurtle.pd()
-		buildingTurtle.begin_fill()
-		turtlePos = buildingTurtle.pos()
-		buildingTurtle.goto(turtlePos[0] + widthZ, turtlePos[1] + (widthZ/2))
-		turtlePos = buildingTurtle.pos()
-		buildingTurtle.goto(turtlePos[0] - widthX, turtlePos[1] + (widthX/2))
-		turtlePos = buildingTurtle.pos()
-		buildingTurtle.goto(turtlePos[0] - widthZ, turtlePos[1] - (widthZ/2))
-		turtlePos = buildingTurtle.pos()
-		buildingTurtle.goto(turtlePos[0] + widthX, turtlePos[1] - (widthX/2))
-		buildingTurtle.end_fill()
-		buildingTurtle.pu()
-	buildingTurtle.ht()
+		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight)
+		buildingTurtle.stamp()
+		buildingTurtle.ht()
 
 def initBuildingGrid():
 	# 4x4 grid
 	wallColors = ["#AAAAAA", "#BBBB99", "#DDCCCC"]
 	outlineColors = ["#666666"]
+	windowColors = [""]
 	grid = [
 		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0]),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
 		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
-		((0, -2), (-2, -2), 20, wallColors[1], outlineColors[0])
+		((0, -1), (0, -2), 20, wallColors[1], outlineColors[0])
 	]
 	scales = [30, 10, 20]
 	return (grid, scales)
