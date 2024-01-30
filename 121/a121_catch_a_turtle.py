@@ -22,7 +22,6 @@ writer.pu()
 writer.ht()
 size = tScreen.screensize()
 writer.goto(-1*(size[0]), size[1])
-print(str(size))
 
 trtl = turtle.Turtle()
 trtl.turtlesize(turtleSize)
@@ -34,15 +33,23 @@ trtl.pu()
 #-----game functions--------
 def settings():
 	mode = tScreen.numinput("A121 - Settings", "Select which setting you would like to change.\n[0 - Time, 1 - Background Color, 2 - Target Color]")
+	print(mode)
 	if mode == 0:
-		globals()['maxTime'] = tScreen.numinput("A121 - Settings", "Please enter the timing period in seconds.")
-		globals()['timer'] = maxTime
+		response = tScreen.numinput("A121 - Settings", "Please enter the timing period in seconds.")
+		print(response)
+		globals()['maxTime'] = response
+	elif mode == 1:
+		response = tScreen.textinput("A121 - Settings", "Enter background color as a hex code.")
+		tScreen.bgcolor(response)
+	elif mode == 2:
+		response = tScreen.textinput("A121 - Settings", "Enter target color as a hex code.")
+		trtl.color(response)
 
 
 def regenText():
 	text = f"Click the target to start!\nHighscore: {highscore} points\nPress any key to open settings"
 	if gameRunning:
-		text = f"Score: {str(score)}\nTime Remaining: {timer} secs"
+		text = f"Score: {str(score)}\nTime Remaining: {round(timer)} secs"
 	writer.clear()
 	writer.write(text, font=("Arial", 14, "normal"))
 
@@ -60,7 +67,7 @@ def onTimerDecrement():
 def turtleClicked(pos, btn):
 	if not gameRunning:
 		globals()['gameRunning'] = True
-		globals()['timer'] = 30
+		globals()['timer'] = maxTime
 		tScreen.ontimer(onTimerDecrement, 1000)
 	trtl.goto(random.randint(-size[0], size[0]), random.randint(-size[1], size[1]))
 	globals()['score'] += 1
@@ -69,5 +76,6 @@ def turtleClicked(pos, btn):
 #-----events----------------
 trtl.onclick(turtleClicked)
 tScreen.onkeypress(settings)
+tScreen.listen()
 regenText()
 tScreen.mainloop()

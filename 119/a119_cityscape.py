@@ -71,12 +71,12 @@ def drawBuildingGrid(buildingGrid):
 		# Draw Floors
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, building[3], building[4], building[5])
+		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, building[3], building[4])
 		for i in range(building[2]):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
 		# Draw Roof
-		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight)
+		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight, building[3], building[4])
 		buildingTurtle.stamp()
 		buildingTurtle.ht()
 
@@ -84,7 +84,7 @@ def initBuildingGrid():
 	# 4x4 grid
 	wallColors = ["#AAAAAA", "#BBBB99", "#DDCCCC"]
 	outlineColors = ["#666666"]
-	windowColors = [""]
+	windowColors = ["#AABBFF"]
 	grid = [
 		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0]),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
