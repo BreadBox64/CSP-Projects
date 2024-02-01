@@ -37,21 +37,17 @@ for s in turtle_shapes:
 
 # TODO: move turtles across and down screen, stopping for collisions
 
-def collision(t0, s):
-  for t1 in s:
-    if (20 > abs(t0.xcor() - t1.xcor())) and (20 > abs(t0.ycor() - t1.ycor())):
-      return t1
-  return False
+def collision(t0, t1):
+  return (20 > abs(t0.xcor() - t1.xcor())) and (20 > abs(t0.ycor() - t1.ycor()))
 
-lists = [(horiz_turtles, vert_turtles), (vert_turtles, horiz_turtles)]
-for step in range(50*2*len(horiz_turtles)):
-  for i in lists:
-    t = random.choice(i[0])
-    t.fd(10)
-    collide = collision(t, i[1])
-    if collide:
-      i[1].remove(collide)
-      
+for i in range(50):
+  for ht in horiz_turtles:
+    for vt in vert_turtles:
+      ht.fd(10)
+      vt.fd(10)
+      if collision(ht, vt):
+        horiz_turtles.remove(ht)
+        vert_turtles.remove(vt)      
 
 wn = trtl.Screen()
 wn.mainloop()
