@@ -2,7 +2,7 @@
 #   Move turtles horizontally and vertically across screen.
 #   Stopping turtles when they collide.
 import turtle as trtl
-import numpy
+import random
 
 # create two empty lists of turtles, adding to them later
 horiz_turtles = []
@@ -22,6 +22,7 @@ for s in turtle_shapes:
   ht.fillcolor(new_color)
   ht.goto(-350, tloc)
   ht.setheading(0)
+  ht.speed(0)
 
   vt = trtl.Turtle(shape=s)
   vert_turtles.append(vt)
@@ -30,20 +31,27 @@ for s in turtle_shapes:
   vt.fillcolor(new_color)
   vt.goto( -tloc, 350)
   vt.setheading(270)
-  
+  vt.speed(0)
+
   tloc += 50
 
 # TODO: move turtles across and down screen, stopping for collisions
 
 def collision(t0, s):
   for t1 in s:
-    a = (20 < abs(numpy.subtract(t1.pos(), t0.pos())))
-    return a
+    if (20 > abs(t0.xcor() - t1.xcor())) and (20 > abs(t0.ycor() - t1.ycor())):
+      return t1
+  return False
 
-for step in range(50):
-	for t in horiz_turtles:
-    if not collision(t, horiz_turtles):
-      pass
+lists = [(horiz_turtles, vert_turtles), (vert_turtles, horiz_turtles)]
+for step in range(50*2*len(horiz_turtles)):
+  for i in lists:
+    t = random.choice(i[0])
+    t.fd(10)
+    collide = collision(t, i[1])
+    if collide:
+      i[1].remove(collide)
+      
 
 wn = trtl.Screen()
 wn.mainloop()
