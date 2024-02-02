@@ -13,6 +13,9 @@ turtle_shapes = ["arrow", "turtle", "circle", "square", "triangle", "classic"]
 horiz_colors = ["red", "blue", "green", "orange", "purple", "gold"]
 vert_colors = ["darkred", "darkblue", "lime", "salmon", "indigo", "brown"]
 
+wn = trtl.Screen()
+wn.setworldcoordinates(-400, -100, 100, 400)
+
 tloc = 50
 for s in turtle_shapes:
   ht = trtl.Turtle(shape=s)
@@ -29,25 +32,38 @@ for s in turtle_shapes:
   vt.penup()
   new_color = vert_colors.pop()
   vt.fillcolor(new_color)
-  vt.goto( -tloc, 350)
+  vt.goto(-tloc, 350)
   vt.setheading(270)
   vt.speed(0)
 
   tloc += 50
 
-# TODO: move turtles across and down screen, stopping for collisions
+oldColors = []
 
-def collision(t0, t1):
-  return (20 > abs(t0.xcor() - t1.xcor())) and (20 > abs(t0.ycor() - t1.ycor()))
+def collision(t0, s0, t1, s1):
+  a = (t0.xcor() + s0 + 20) < t1.xcor()
+  b = (t0.xcor() - 20) > t1.xcor()
+  c = ((t1.ycor() - s1) - 20) > t0.ycor()
+  d = (t1.ycor() + 20) < t0.ycor()
+  print(f"[{str(a)}, {str(b)}, {str(c)}, {str(d)}]")
+  if (a or b) and (c or d):
+    t0.fd(s0)
+    oldColors.index(t1)
+    t1.fd(s1)
+  else:
+    t0.fd(s0)
+    t1.fd(s1)
+    oldColors[t1.color()[1]] = t1
+    t1.color("grey")
+    t1.bk(s1)
 
 for i in range(50):
   for ht in horiz_turtles:
     for vt in vert_turtles:
-      ht.fd(10)
-      vt.fd(10)
-      if collision(ht, vt):
-        horiz_turtles.remove(ht)
-        vert_turtles.remove(vt)      
+      collision(ht, 2, vt, 2)    
 
-wn = trtl.Screen()
+for i in [horiz_turtles, vert_turtles]:
+  for t in i:
+    t.color("grey")
+
 wn.mainloop()
