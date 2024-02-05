@@ -35,13 +35,6 @@ def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False,
 	height = oldBuildingShapeVars.height if (usePreviousValues and not height) else (height if height else 10)
 	wallColor = oldBuildingShapeVars.wallColor if (usePreviousValues and not wallColor) else (wallColor if wallColor else "#AAAAAA")
 	outlineColor = oldBuildingShapeVars.outlineColor if (usePreviousValues and not outlineColor) else (outlineColor if outlineColor else "#666666")
-	if not window:
-		buildingWindow = Shape("compound")
-		screen.register_shape("buildingWindow", buildingWindow)
-		drawTurtle.shape("buildingWindow")
-		return 0
-	windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not window) else window[0] 
-	windowScale = oldBuildingShapeVars.windowScale if (usePreviousValues and not window) else (generateWindowScale(window, widthX, widthZ, height) if (type(window) == int) else window[1]) # (A, B, C) A - width of window, B - width of gaps, C - range 0-1 representing window height
 	halfWidthX = widthX/2
 	halfWidthZ = widthZ/2
 
@@ -60,15 +53,24 @@ def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False,
 		return 0
 	elif mode == "window":
 		buildingWindow = Shape("compound")
-		wW = windowScale[0]
-		wH = -1*(wW/2)
-		gW = windowScale[1]
-		gH = -1*(gW/2)
-		wS = windowScale[2] * height
-		wNumX = math.floor(widthX/(gW+wW))
-		wPosX = [(gW, gH), (widthX-(gW+wW), halfWidthX-(wH+gH))]
-		for pos in wPosX:
-			buildingWindow.addcomponent((pos, vAdd(pos, (wW, wH)), vAdd(pos, (wW, wS+wH)), vAdd(pos, (0, wS))), windowColor, outlineColor)
+		if not window:
+			return 1
+		windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not window) else window[0] 
+		windowScale = oldBuildingShapeVars.windowScale if (usePreviousValues and not window) else (generateWindowScale(window, widthX, widthZ, height) if (type(window) == int) else window[1]) # (A, B, C) A - width of window, B - range 0-1 representing window height, C - num of windows
+		wW = windowScale[0] # Window Width
+		wH = (wW/2) # Window Half Width
+		wQ = (wW/4) # Window Quarter Width
+		wS = windowScale[1] * height # Window Scale (height)
+		wNumX = windowScale[2]
+		for i in range(1, wNumX+1):
+			offset = i/(wNumX+1)
+			offPos = (-offset*widthX, (offset*halfWidthX)+((height-wS)*0.5))
+			buildingWindow.addcomponent([
+				vAdd(offPos, (-wH, wS+wQ)),
+				vAdd(offPos, (wH, wS-wQ)),
+				vAdd(offPos, (wH, -wQ)),
+				vAdd(offPos, (-wH, wQ)),
+			], windowColor, outlineColor)
 		screen.register_shape("buildingWindow", buildingWindow)
 		drawTurtle.shape("buildingWindow")
 		return 0
@@ -93,7 +95,7 @@ def drawBuildingGrid(buildingGrid):
 		widthZ = (unitWidthZ * buildingWidth) + ((unitWidthZ - 1) * streetWidth)
 		wallColor = building[3]
 		outlineColor = building[4]
-		window = building[5] if building and building[5] else False
+		window = building[5] if len(building) > 5 else False
 		# Draw Floors
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
@@ -102,12 +104,13 @@ def drawBuildingGrid(buildingGrid):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
 		# Draw Windows
-		buildingTurtle.goto(offsetX, offsetY)
-		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, "window", False, widthX, widthZ, buildingHeight, wallColor, outlineColor, window)
-		for i in range(building[2]):
-			buildingTurtle.stamp()
-			buildingTurtle.fd(buildingHeight)
+		if window:
+			redefineBuildingShape(buildingTurtle, "window", False, widthX, widthZ, buildingHeight, wallColor, outlineColor, window)
+			buildingTurtle.goto(offsetX, offsetY)
+			buildingTurtle.seth(90)
+			for i in range(building[2]):
+				buildingTurtle.stamp()
+				buildingTurtle.fd(buildingHeight)
 		# Draw Roof
 		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight, wallColor, outlineColor)
 		buildingTurtle.stamp()
@@ -119,7 +122,7 @@ def initBuildingGrid():
 	outlineColors = ["#666666"]
 	windowColors = ["#AABBFF"]
 	grid = [
-		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (10, 5, 0.8))),
+		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (5, 0.6, 3))),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
 		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
 		((0, -1), (0, -2), 20, wallColors[1], outlineColors[0])
