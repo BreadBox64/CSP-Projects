@@ -16,7 +16,7 @@ oldHorizColors = horiz_colors.copy()
 oldVertColors = vert_colors.copy()
 
 wn = trtl.Screen()
-wn.setworldcoordinates(-400, -1400, 1400, 400)
+wn.setworldcoordinates(-400, -100, 100, 400)
 wn.delay(1)
 
 tloc = 50
@@ -67,7 +67,7 @@ def collision(t0, s0, i0, t1, s1, i1):
         oldHorizColors[i1] = color
       t1.color("grey")
 
-for i in range(50):
+for i in range(10):
   h = 0
   for ht in horiz_turtles:
     v = 0

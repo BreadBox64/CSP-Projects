@@ -11,6 +11,15 @@ buildingTurtle.pu()
 buildingTurtle.ht()
 #buildingTurtle.speed(0)
 
+def vAdd(*args):
+	out = []
+	for i in args[0]:
+		out.append(0)
+	for v in args:
+		for i in range(len(out)):
+			out[i] += v[i]
+	return out
+
 # Building Aid Functions
 oldBuildingShapeVars = {
 	"widthX": 30,
@@ -20,34 +29,48 @@ oldBuildingShapeVars = {
 	"outlineColor": "#666666",
 	"windowColor": False
 }
-def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False, widthX = False, widthZ = False, height = False, wallColor = False, outlineColor = False, windowColor = False):
+def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False, widthX = False, widthZ = False, height = False, wallColor = False, outlineColor = False, window = False):
 	widthX = oldBuildingShapeVars.widthX if (usePreviousValues and not widthX) else (widthX if widthX else 30)
 	widthZ = oldBuildingShapeVars.widthZ if (usePreviousValues and not widthZ) else (widthZ if widthZ else 30)
 	height = oldBuildingShapeVars.height if (usePreviousValues and not height) else (height if height else 10)
 	wallColor = oldBuildingShapeVars.wallColor if (usePreviousValues and not wallColor) else (wallColor if wallColor else "#AAAAAA")
 	outlineColor = oldBuildingShapeVars.outlineColor if (usePreviousValues and not outlineColor) else (outlineColor if outlineColor else "#666666")
-	windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not windowColor) else windowColor
+	if not window:
+		buildingWindow = Shape("compound")
+		screen.register_shape("buildingWindow", buildingWindow)
+		drawTurtle.shape("buildingWindow")
+		return 0
+	windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not window) else window[0] 
+	windowScale = oldBuildingShapeVars.windowScale if (usePreviousValues and not window) else (generateWindowScale(window, widthX, widthZ, height) if (type(window) == int) else window[1]) # (A, B, C) A - width of window, B - width of gaps, C - range 0-1 representing window height
+	halfWidthX = widthX/2
+	halfWidthZ = widthZ/2
 
 	if mode == "floor":
 		buildingFloor = Shape("compound")
-		halfWidthX = widthX/2
-		halfWidthZ = widthZ/2
 		buildingFloor.addcomponent(((0, 0), (widthZ, halfWidthZ), (widthZ, halfWidthZ + height), (0, height), (-widthX, halfWidthX + height), (-widthX, halfWidthX)), wallColor, outlineColor)
 		buildingFloor.addcomponent(((0, 0), (0, height)), outlineColor, outlineColor)
 		screen.register_shape("buildingFloor", buildingFloor)
 		drawTurtle.shape("buildingFloor")
 		return 0
 	elif mode == "roof":
-		buildingRoof = Shape("compound")
-		halfWidthX = widthX/2
-		halfWidthZ = widthZ/2
+		buildingRoof = Shape("compound")		
 		buildingRoof.addcomponent(((0, 0), (widthZ, halfWidthZ), (widthZ - widthX, halfWidthX + halfWidthZ), (-widthX, halfWidthX)), wallColor, outlineColor)
 		screen.register_shape("buildingRoof", buildingRoof)
 		drawTurtle.shape("buildingRoof")
 		return 0
 	elif mode == "window":
 		buildingWindow = Shape("compound")
-		
+		wW = windowScale[0]
+		wH = -1*(wW/2)
+		gW = windowScale[1]
+		gH = -1*(gW/2)
+		wS = windowScale[2] * height
+		wNumX = math.floor(widthX/(gW+wW))
+		wPosX = [(gW, gH), (widthX-(gW+wW), halfWidthX-(wH+gH))]
+		for pos in wPosX:
+			buildingWindow.addcomponent((pos, vAdd(pos, (wW, wH)), vAdd(pos, (wW, wS+wH)), vAdd(pos, (0, wS))), windowColor, outlineColor)
+		screen.register_shape("buildingWindow", buildingWindow)
+		drawTurtle.shape("buildingWindow")
 		return 0
 
 def drawBuildingGrid(buildingGrid):
@@ -68,15 +91,25 @@ def drawBuildingGrid(buildingGrid):
 		widthX = (unitWidthX * buildingWidth) + ((unitWidthX - 1) * streetWidth)
 		unitWidthZ = (abs(building[0][1] - building[1][1]) + 1)
 		widthZ = (unitWidthZ * buildingWidth) + ((unitWidthZ - 1) * streetWidth)
+		wallColor = building[3]
+		outlineColor = building[4]
+		window = building[5] if building and building[5] else False
 		# Draw Floors
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
-		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, building[3], building[4])
+		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, wallColor, outlineColor)
+		for i in range(building[2]):
+			buildingTurtle.stamp()
+			buildingTurtle.fd(buildingHeight)
+		# Draw Windows
+		buildingTurtle.goto(offsetX, offsetY)
+		buildingTurtle.seth(90)
+		redefineBuildingShape(buildingTurtle, "window", False, widthX, widthZ, buildingHeight, wallColor, outlineColor, window)
 		for i in range(building[2]):
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
 		# Draw Roof
-		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight, building[3], building[4])
+		redefineBuildingShape(buildingTurtle, "roof", False, widthX, widthZ, buildingHeight, wallColor, outlineColor)
 		buildingTurtle.stamp()
 		buildingTurtle.ht()
 
@@ -86,7 +119,7 @@ def initBuildingGrid():
 	outlineColors = ["#666666"]
 	windowColors = ["#AABBFF"]
 	grid = [
-		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0]),
+		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (10, 5, 0.8))),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
 		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
 		((0, -1), (0, -2), 20, wallColors[1], outlineColors[0])
