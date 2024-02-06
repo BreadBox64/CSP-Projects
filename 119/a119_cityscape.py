@@ -62,15 +62,29 @@ def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False,
 		wQ = (wW/4) # Window Quarter Width
 		wS = windowScale[1] * height # Window Scale (height)
 		wNumX = windowScale[2]
-		for i in range(1, wNumX+1):
-			offset = i/(wNumX+1)
-			offPos = (-offset*widthX, (offset*halfWidthX)+((height-wS)*0.5))
-			buildingWindow.addcomponent([
-				vAdd(offPos, (-wH, wS+wQ)),
-				vAdd(offPos, (wH, wS-wQ)),
-				vAdd(offPos, (wH, -wQ)),
-				vAdd(offPos, (-wH, wQ)),
-			], windowColor, outlineColor)
+		scalerX = 2*(wNumX)
+		for i in range(scalerX):
+			if i % 2 == 1:
+				offset = i/scalerX
+				offPos = (-offset*widthX, (offset*halfWidthX)+((height-wS)*0.5))
+				buildingWindow.addcomponent([
+					vAdd(offPos, (-wH, wS+wQ)),
+					vAdd(offPos, (wH, wS-wQ)),
+					vAdd(offPos, (wH, -wQ)),
+					vAdd(offPos, (-wH, wQ)),
+				], windowColor, outlineColor)
+		wNumY = windowScale[3]
+		scalerY = 2*(wNumY)
+		for i in range(scalerY):
+			if i % 2 == 1:
+				offset = i/scalerY
+				offPos = (offset*widthZ, (offset*halfWidthZ)+((height-wS)*0.5))
+				buildingWindow.addcomponent([
+					vAdd(offPos, (-wH, -wQ)),
+					vAdd(offPos, (-wH, wS-wQ)),
+					vAdd(offPos, (wH, wS+wQ)),
+					vAdd(offPos, (wH, wQ)),
+				], windowColor, outlineColor)
 		screen.register_shape("buildingWindow", buildingWindow)
 		drawTurtle.shape("buildingWindow")
 		return 0
@@ -83,7 +97,41 @@ def drawBuildingGrid(buildingGrid):
 	streetWidth = scales[2]
 	halfWidth = buildingWidth/2
 	streetHalfWidth = streetWidth/2
+	streetQuarterWidth = streetWidth/4
+	streetSixthWidth = streetWidth/6
 	buildingTurtle.st()
+
+	for building in grid:
+		# Variable Setup
+		offsetX = ((building[0][0] - building[0][1]) * buildingWidth) + (((building[0][0] - building[0][1]) - 1) * streetWidth)
+		offsetY = ((building[0][0] + building[0][1]) * halfWidth) + ((building[0][0] + building[0][1] - 1) * streetHalfWidth)
+		unitWidthX = (abs(building[0][0] - building[1][0]) + 1)
+		widthX = (unitWidthX * buildingWidth) + ((unitWidthX - 1) * streetWidth)
+		widthSX =  widthX + streetWidth
+		unitWidthZ = (abs(building[0][1] - building[1][1]) + 1)
+		widthZ = (unitWidthZ * buildingWidth) + ((unitWidthZ - 1) * streetWidth)
+		widthSZ = widthZ + streetWidth
+		# Draw Streets
+		buildingTurtle.goto(offsetX, offsetY-streetSixthWidth)
+		buildingTurtle.color("#666666")
+		buildingTurtle.pd()
+		buildingTurtle.begin_fill()
+		buildingTurtle.goto(offsetX-widthSX, (widthSX/2)+offsetY-streetSixthWidth)
+		buildingTurtle.goto(offsetX-widthSX, (widthSX/2)+offsetY-(5*streetSixthWidth))
+		buildingTurtle.goto(offsetX, offsetY-(5*streetSixthWidth))
+		buildingTurtle.goto(offsetX+widthSZ, (widthSZ/2)+offsetY-(5*streetSixthWidth))
+		buildingTurtle.goto(offsetX+widthSZ, (widthSZ/2)+offsetY-streetSixthWidth)
+		buildingTurtle.end_fill()
+		buildingTurtle.color("#CCCC66")
+		buildingTurtle.pu()
+		buildingTurtle.goto(offsetX-widthX-streetHalfWidth, (widthX/2)+offsetY-streetQuarterWidth)
+		buildingTurtle.pd()
+		buildingTurtle.goto(offsetX-streetHalfWidth, offsetY-streetQuarterWidth)
+		buildingTurtle.pu()
+		buildingTurtle.goto(offsetX+streetHalfWidth, offsetY-streetQuarterWidth)
+		buildingTurtle.pd()
+		buildingTurtle.goto(offsetX+widthZ+streetHalfWidth, (widthZ/2)+offsetY-streetQuarterWidth)
+		buildingTurtle.pu()
 
 	for building in grid:
 		# Variable Setup
@@ -122,7 +170,7 @@ def initBuildingGrid():
 	outlineColors = ["#666666"]
 	windowColors = ["#AABBFF"]
 	grid = [
-		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (5, 0.6, 4))),
+		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (5, 0.6, 4, 4))),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
 		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
 		((0, -1), (0, -2), 20, wallColors[1], outlineColors[0])
