@@ -39,10 +39,10 @@ def settings():
 		print(response)
 		globals()['maxTime'] = response
 	elif mode == 1:
-		response = tScreen.textinput("A121 - Settings", "Enter background color as a hex code.")
+		response = tScreen.textinput("A121 - Settings", "Enter background color as a color string.")
 		tScreen.bgcolor(response)
 	elif mode == 2:
-		response = tScreen.textinput("A121 - Settings", "Enter target color as a hex code.")
+		response = tScreen.textinput("A121 - Settings", "Enter target color as a color string.")
 		trtl.color(response)
 
 
