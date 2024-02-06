@@ -2,16 +2,20 @@ from turtle import *
 import random
 import math
 
+# Screen Setup
 screen = Screen()
 screen.colormode(255)
 size = screen.screensize()
+screen.delay(0)
+screen.bgcolor("#7CFC00")
 
-# Turtle Inits
+# Turtle Setup
 buildingTurtle = Turtle()
 buildingTurtle.pu()
 buildingTurtle.ht()
 buildingTurtle.speed(0)
 
+# Vector Addition
 def vAdd(*args):
 	out = []
 	for i in args[0]:
@@ -30,7 +34,9 @@ oldBuildingShapeVars = {
 	"outlineColor": "#666666",
 	"windowColor": False
 }
+# This function changes the turtle shape to match that of the specified mode (floor, roof, or window) this can then be stamped to make drawing faster
 def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False, widthX = False, widthZ = False, height = False, wallColor = False, outlineColor = False, window = False):
+	# Variable Init
 	widthX = oldBuildingShapeVars.widthX if (usePreviousValues and not widthX) else (widthX if widthX else 30)
 	widthZ = oldBuildingShapeVars.widthZ if (usePreviousValues and not widthZ) else (widthZ if widthZ else 30)
 	height = oldBuildingShapeVars.height if (usePreviousValues and not height) else (height if height else 10)
@@ -55,13 +61,14 @@ def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False,
 	elif mode == "window":
 		buildingWindow = Shape("compound")
 		if not window:
-			return 1
+			return 1 # Return non-zero output to signify an error condition
 		windowColor = oldBuildingShapeVars.windowColor if (usePreviousValues and not window) else window[0] 
-		windowScale = oldBuildingShapeVars.windowScale if (usePreviousValues and not window) else (generateWindowScale(window, widthX, widthZ, height) if (type(window) == int) else window[1]) # (A, B, C) A - width of window, B - range 0-1 representing window height, C - num of windows
+		windowScale = oldBuildingShapeVars.windowScale if (usePreviousValues and not window) else (generateWindowScale(window, widthX, widthZ, height) if (type(window) == int) else window[1]) # (A, B, C, D) A - width of window, B - range 0-1 representing window height, C - num of windows
 		wW = windowScale[0] # Window Width
 		wH = (wW/2) # Window Half Width
 		wQ = (wW/4) # Window Quarter Width
 		wS = windowScale[1] * height # Window Scale (height)
+		# X Axis Windows
 		wNumX = windowScale[2]
 		scalerX = 2*(wNumX)
 		for i in range(scalerX):
@@ -74,11 +81,12 @@ def redefineBuildingShape(drawTurtle, mode = "floor", usePreviousValues = False,
 					vAdd(offPos, (wH, -wQ)),
 					vAdd(offPos, (-wH, wQ)),
 				], windowColor, outlineColor)
-		wNumY = windowScale[3]
-		scalerY = 2*(wNumY)
-		for i in range(scalerY):
+		# Z Axis Windows
+		wNumZ = windowScale[3]
+		scalerZ = 2*(wNumZ)
+		for i in range(scalerZ):
 			if i % 2 == 1:
-				offset = i/scalerY
+				offset = i/scalerZ
 				offPos = (offset*widthZ, (offset*halfWidthZ)+((height-wS)*0.5))
 				buildingWindow.addcomponent([
 					vAdd(offPos, (-wH, -wQ)),
@@ -102,6 +110,7 @@ def drawBuildingGrid(buildingGrid):
 	streetSixthWidth = streetWidth/6
 	buildingTurtle.st()
 
+	# Draw roads, this is done earlier to prevent erronous overlapping
 	for building in grid:
 		# Variable Setup
 		offsetX = ((building[0][0] - building[0][1]) * buildingWidth) + (((building[0][0] - building[0][1]) - 1) * streetWidth)
@@ -123,6 +132,7 @@ def drawBuildingGrid(buildingGrid):
 		buildingTurtle.goto(offsetX+widthSZ, (widthSZ/2)+offsetY-(5*streetSixthWidth))
 		buildingTurtle.goto(offsetX+widthSZ, (widthSZ/2)+offsetY-streetSixthWidth)
 		buildingTurtle.end_fill()
+		# Draw Road Markings
 		buildingTurtle.color("#CCCC66")
 		buildingTurtle.pu()
 		buildingTurtle.goto(offsetX-widthX-streetHalfWidth, (widthX/2)+offsetY-streetQuarterWidth)
@@ -134,6 +144,7 @@ def drawBuildingGrid(buildingGrid):
 		buildingTurtle.goto(offsetX+widthZ+streetHalfWidth, (widthZ/2)+offsetY-streetQuarterWidth)
 		buildingTurtle.pu()
 
+	# Draw actual buildings
 	for building in grid:
 		# Variable Setup
 		offsetX = ((building[0][0] - building[0][1]) * buildingWidth) + (((building[0][0] - building[0][1]) - 1) * streetWidth)
@@ -149,7 +160,7 @@ def drawBuildingGrid(buildingGrid):
 		buildingTurtle.goto(offsetX, offsetY)
 		buildingTurtle.seth(90)
 		redefineBuildingShape(buildingTurtle, "floor", False, widthX, widthZ, buildingHeight, wallColor, outlineColor)
-		for i in range(building[2]):
+		for i in range(building[2]): # Stamp the 
 			buildingTurtle.stamp()
 			buildingTurtle.fd(buildingHeight)
 		# Draw Windows
@@ -166,10 +177,10 @@ def drawBuildingGrid(buildingGrid):
 		buildingTurtle.ht()
 
 def initBuildingGrid():
-	# 4x4 grid
-	wallColors = ["#AAAAAA", "#BBBB99", "#DDCCCC"]
-	outlineColors = ["#666666"]
-	windowColors = ["#AABBFF"]
+	wallColorsTall = ["#AAAAAA", "#BBAAAA", "#DDCCCC", "#AAAABB", "#CCCCDD", "#CCCCCC"]
+	wallColorsShort = ["#FFCCBB", "#DDD0BB", "#DDCCCC", "#CCCCCC"]
+	outlineColors = ["#666666", "#777777"]
+	windowColors = ["#AABBFF", "#99AADD", "#8899CC"]
 	"""grid = [
 		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (5, 0.6, 4, 4))),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
@@ -178,9 +189,18 @@ def initBuildingGrid():
 	]"""
 	pairsWidth = size[0]/50
 	grid = []
-	for x in range(pairsWidth):
-		for y in range(pairsWidth):
-			grid.append()
+	for sum in range(int((pairsWidth*2) - 1), -1, -1): # Setting up the for loop this way pre-sorts the list back to front, meaning no additional sorting is needed before drawing
+		for x in range(sum + 1): # Get all number pairs for that sum
+			pos = (x, sum-x)
+			pos = vAdd(pos, (-math.ceil(pairsWidth/2), -math.ceil(pairsWidth/2)))
+			floors = math.floor(random.gauss(10, 5))
+			floors = floors if floors > 0 else 1
+			wallColor = random.choice(wallColorsShort) if floors < 5 else random.choice(wallColorsTall)
+			windows = random.choice([4, 4, 3, 2, 0]) if floors < 5 else 4
+			window = (random.choice(windowColors), (random.choice([4, 5, 6]), random.choice([0.5, 0.6, 0.7, 0.8, 0.9, 1.0]), windows, (windows if windows != 0 else 2)))
+			building = (pos, pos, floors, wallColor, random.choice(outlineColors), window)
+			grid.append(building)
+
 	scales = [32, 10, 18] # (width, height, street width)
 	return (grid, scales)
 
