@@ -4,12 +4,13 @@ import math
 
 screen = Screen()
 screen.colormode(255)
+size = screen.screensize()
 
 # Turtle Inits
 buildingTurtle = Turtle()
 buildingTurtle.pu()
 buildingTurtle.ht()
-#buildingTurtle.speed(0)
+buildingTurtle.speed(0)
 
 def vAdd(*args):
 	out = []
@@ -169,12 +170,17 @@ def initBuildingGrid():
 	wallColors = ["#AAAAAA", "#BBBB99", "#DDCCCC"]
 	outlineColors = ["#666666"]
 	windowColors = ["#AABBFF"]
-	grid = [
+	"""grid = [
 		((3, 0), (3, 0), 5, wallColors[0], outlineColors[0], (windowColors[0], (5, 0.6, 4, 4))),
 		((0, 0), (1, 1), 2, wallColors[1], outlineColors[0]),
 		((0, 2), (0, 3), 7, wallColors[2], outlineColors[0]),
 		((0, -1), (0, -2), 20, wallColors[1], outlineColors[0])
-	]
+	]"""
+	pairsWidth = size[0]/50
+	grid = []
+	for x in range(pairsWidth):
+		for y in range(pairsWidth):
+			grid.append()
 	scales = [32, 10, 18] # (width, height, street width)
 	return (grid, scales)
 
