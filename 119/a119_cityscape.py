@@ -110,7 +110,7 @@ def drawBuildingGrid(buildingGrid):
 	streetSixthWidth = streetWidth/6
 	buildingTurtle.st()
 
-	# Draw roads, this is done earlier to prevent erronous overlapping
+	# Draw roads, this is done earlier to prevent erroneous overlapping
 	for building in grid:
 		# Variable Setup
 		offsetX = ((building[0][0] - building[0][1]) * buildingWidth) + (((building[0][0] - building[0][1]) - 1) * streetWidth)
@@ -177,6 +177,8 @@ def drawBuildingGrid(buildingGrid):
 		buildingTurtle.ht()
 
 def initBuildingGrid():
+	scales = [32, 10, 18] # (width, height, street width)
+
 	wallColorsTall = ["#AAAAAA", "#BBAAAA", "#DDCCCC", "#AAAABB", "#CCCCDD", "#CCCCCC"]
 	wallColorsShort = ["#FFCCBB", "#DDD0BB", "#DDCCCC", "#CCCCCC"]
 	outlineColors = ["#666666", "#777777"]
@@ -193,15 +195,23 @@ def initBuildingGrid():
 		for x in range(sum + 1): # Get all number pairs for that sum
 			pos = (x, sum-x)
 			pos = vAdd(pos, (-math.ceil(pairsWidth/2), -math.ceil(pairsWidth/2)))
+			nPos = pos
 			floors = math.floor(random.gauss(10, 5))
 			floors = floors if floors > 0 else 1
 			wallColor = random.choice(wallColorsShort) if floors < 5 else random.choice(wallColorsTall)
 			windows = random.choice([4, 4, 3, 2, 0]) if floors < 5 else 4
-			window = (random.choice(windowColors), (random.choice([4, 5, 6]), random.choice([0.5, 0.6, 0.7, 0.8, 0.9, 1.0]), windows, (windows if windows != 0 else 2)))
-			building = (pos, pos, floors, wallColor, random.choice(outlineColors), window)
+			multiplier = 1 # How much wider is the building
+			if (sum % 2 == 0) and (sum != 14): # Prevent overrun
+				if random.randint(0, 4) == 0:
+					nPos = vAdd(pos, (0, 1))
+					mPos = vAdd(pos, (1, 0)) # Not sure why this is needed, but it works
+					multiplier = (2*scales[0] + scales[2])/scales[0]
+					for building in grid:
+						if building[0] == mPos:
+							grid.remove(building)
+			window = (random.choice(windowColors), (random.choice([4, 5, 6]), random.choice([0.5, 0.6, 0.7, 0.8, 0.9, 1.0]), windows, math.floor(multiplier*(windows if windows != 0 else 2))))
+			building = (pos, nPos, floors, wallColor, random.choice(outlineColors), window)
 			grid.append(building)
-
-	scales = [32, 10, 18] # (width, height, street width)
 	return (grid, scales)
 
 # Shape Building Turtle
