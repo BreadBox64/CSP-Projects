@@ -3,7 +3,7 @@
 from turtle import *
 import turtle as turtle
 import random
-import leaderboard as lb
+import leaderboard
 
 #-----game configuration----
 turtleSize = 2
@@ -11,6 +11,8 @@ turtleColor = "#000000"
 turtleShape = "circle"
 
 leaderboardFile = "leaderboard.txt"
+lb = leaderboard.Leaderboard(leaderboardFile)
+
 score = 0
 timer = 30
 maxTime = 30
@@ -35,21 +37,15 @@ trtl.speed(0)
 trtl.pu()
 
 lbTurtle = turtle.Turtle()
+lbTurtle.ht()
 lbTurtle.pu()
 
 #-----game functions--------
 
 # manages the leaderboard for top 5 scorers
-def manage_leaderboard():
-	# get the names and scores from the leaderboard file
-	leaderNameList = lb.get_names(leaderboardFile)
-	leaderScoreList = lb.get_scores(leaderboardFile)
-
-	# show the leaderboard with or without the current player
-	highScorer = score > leaderScoreList[4]
-	if (len(leaderScoreList) < 5 or highScorer):
-		lb.update_leaderboard(leaderboardFile, leaderNameList, leaderScoreList, playerName, score)
-	lb.draw_leaderboard(highScorer, leaderNameList, leaderScoreList, lbTurtle, score)
+def manageLeaderboard():
+	highScorer = lb.updateLeaderboard(playerName, score)
+	lb.drawLeaderboard(highScorer, lbTurtle, score)
 
 def settings():
 	mode = tScreen.numinput("A121 - Settings", "Select which setting you would like to change.\n[0 - Time, 1 - Background Color, 2 - Target Color]")
@@ -97,6 +93,7 @@ def onTimerDecrement():
 		globals()['gameRunning'] = False
 		if score > highscore:
 			globals()['highscore'] = score
+		manageLeaderboard()
 		globals()['score'] = 0
 	else:
 		tScreen.ontimer(onTimerDecrement, 1000)
@@ -107,8 +104,10 @@ def turtleClicked(pos, btn):
 		globals()['gameRunning'] = True
 		globals()['timer'] = maxTime
 		tScreen.ontimer(onTimerDecrement, 1000)
+		lbTurtle.clear()
 	trtl.goto(random.randint(-size[0], size[0]), random.randint(-size[1], size[1]))
 	globals()['score'] += 1
+	
 	regenText()
 
 #-----events----------------
