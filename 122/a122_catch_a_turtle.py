@@ -4,14 +4,14 @@ from turtle import *
 import turtle as turtle
 import random
 import leaderboard
+import os
 
 #-----game configuration----
 turtleSize = 2
 turtleColor = "#000000"
 turtleShape = "circle"
 
-leaderboardFile = "leaderboard.txt"
-lb = leaderboard.Leaderboard(leaderboardFile)
+lb = leaderboard.Leaderboard("leaderboard.txt", os.path.dirname(os.path.realpath(__file__)))
 
 score = 0
 timer = 30

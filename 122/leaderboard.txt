@@ -2,4 +2,4 @@ bread,41
 hello,40
 bread,38
 bread,38
-test,30
+box,35

@@ -1,9 +1,11 @@
 # leaderboard.py
 # The leaderboard module to be used in Activity 1.2.2
 import turtle
+import os
 
 class Leaderboard:
 	fileName = ""
+	filePath = ""
 	names = []
 	scores = []
 
@@ -13,6 +15,8 @@ class Leaderboard:
 	goldScore = 25
 
 	def loadFileData(self) -> None:
+		print(self.fileName)
+		os.chdir(self.filePath)
 		leaderboardFile = open(self.fileName, "r")
 		self.names = []
 		self.scores = []
@@ -22,8 +26,9 @@ class Leaderboard:
 			self.scores.append(int(score))
 		leaderboardFile.close()
 		
-	def __init__(self, file:str) -> None:
+	def __init__(self, file:str, path:str) -> None:
 		self.fileName = file
+		self.filePath = path
 		self.loadFileData()
 
 	# return names in the leaderboard file
@@ -62,6 +67,7 @@ class Leaderboard:
 					break
 		
 		if highScorer:
+			os.chdir(self.filePath)
 			leaderboardFile = open(self.fileName, "w")  # this mode opens the file and erases its contents for a fresh start
 
 			for i in range(len(names)):
@@ -113,5 +119,3 @@ class Leaderboard:
 			self.displayMedal(turtle, 'silver', fontSetup)
 		elif playerScore >= self.bronzeScore:
 			self.displayMedal(turtle, 'bronze', fontSetup)
-
-lb = Leaderboard('leaderboard.txt')
