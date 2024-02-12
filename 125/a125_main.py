@@ -14,6 +14,13 @@ inputs = {
 	'S': False,
 	'D': False
 }
+echos = []
+for col in range(175, 239, 16):
+	c = '%X' % col
+	t = Turtle()
+	t.pu()
+	t.color(f"#{c}{c}{c}")
+	echos.append(t)
 
 def genKF(key:str, val:bool):
 	def f():
@@ -38,7 +45,7 @@ for i,f in enumerate(krFunctions):
 	screen.onkeyrelease(f, keys[i])
 
 def screenUpdate():
-	rc.draw(trtl)
+	rc.draw(trtl, echos)
 	screen.ontimer(screenUpdate, 20)
 
 screen.listen()
