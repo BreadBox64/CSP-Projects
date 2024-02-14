@@ -34,12 +34,14 @@ class RacingCar:
 		self.frictionCoeff = _frictionCoeff
 		self.accInertia = 0.0
 		self.rotInertia = 0.0
-		self.maxSpeed = 15
+		self.maxSpeed = 10
 		self.inputs = { # lowercase represents the input inertia, capital the condition of the key
 			'W': False,
 			'A': False,
 			'S': False,
-			'D': False
+			'D': False,
+			'Q': False,
+			'E': False,
 		}
 
 	def _step(self) -> None:
@@ -50,9 +52,10 @@ class RacingCar:
 			self.accInertia += fd if fd + self.accInertia <= 2 and fd + self.accInertia >= -1 else 0 
 		else:
 			self.accInertia = 0
-		rot = (int(inputs['A'])-int(inputs['D'])) * 0.5
+
+		rot = (int(inputs['A'])-int(inputs['D'])) * abs(self.accInertia)
 		if rot != 0:
-			self.rotInertia += rot if rot + self.rotInertia <= 5 and rot + self.rotInertia >= -5 else 0 
+			self.rotInertia += rot if rot + self.rotInertia <= 6 and rot + self.rotInertia >= -6 else 0 
 		else:
 			self.rotInertia = 0
 
@@ -60,17 +63,33 @@ class RacingCar:
 		acc = vRotate((self.accInertia, 0), self.heading)
 		#print(str(acc))
 		acc -= self.vel * (self.frictionCoeff/(vMag(self.vel) + 1))
-		acc -= self.vel * 0.4 * math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
+		acc -= self.vel * 0.5 * math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
 		self.heading += self.rotInertia
 		self.vel += acc
 		if vMag(self.vel) > self.maxSpeed:
 			self.vel = vNorm(self.vel, self.maxSpeed)
 		self.pos += self.vel
 		
-	def draw(self, trtl:Turtle) -> None:
+	def draw(self, trtl:Turtle, echo:list[Turtle]) -> None:
+		if echo is not None:
+			newPos = self.pos
+			newHeading = self.heading
+			for t in echo:
+				oldPos = t.pos()
+				oldHeading = t.heading()
+				t.goto(newPos)
+				t.seth(newHeading)
+				newPos = oldPos
+				newHeading = oldHeading
 		self._step()
 		trtl.goto(self.pos)
 		trtl.seth(self.heading)
 
 	def inputChanged(self, key:str, val:bool) -> None:
 		self.inputs[key] = val
+		#print(key)
+		if val:
+			if key == 'Q':
+				self.maxSpeed -= 1 if self.maxSpeed > 0 else 0
+			elif key == 'E':
+				self.maxSpeed += 1 if self.maxSpeed < 35 else 0
