@@ -1,6 +1,6 @@
 import math
 from turtle import *
-from numpy import cross
+import copy
 
 def vRotate(vec:Vec2D, angle:float) -> Vec2D:
 	rad = math.radians(angle)
@@ -52,8 +52,7 @@ class RacingCar:
 			self.accInertia += fd if fd + self.accInertia <= 2 and fd + self.accInertia >= -1 else 0 
 		else:
 			self.accInertia = 0
-
-		rot = (int(inputs['A'])-int(inputs['D'])) * abs(self.accInertia)
+		rot = (int(inputs['A'])-int(inputs['D'])) * 0.5 * abs(self.accInertia)
 		if rot != 0:
 			self.rotInertia += rot if rot + self.rotInertia <= 6 and rot + self.rotInertia >= -6 else 0 
 		else:
