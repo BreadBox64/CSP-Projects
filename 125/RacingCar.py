@@ -1,6 +1,7 @@
 import math
 from turtle import *
-import copy
+
+sign = lambda x: math.copysign(1, x)
 
 def vRotate(vec:Vec2D, angle:float) -> Vec2D:
 	rad = math.radians(angle)
@@ -26,15 +27,18 @@ class RacingCar:
 	rotInertia:int
 	heading:float
 	inputs:dict
+	gearing:int
+	gearings = [[5, 5.0], [8, 3.5], [12, 2.5], [16, 1.75], [18, 1.2], [20, 1.0], [25, 0.9], [30, 0.8], [35, 0.75]]
 	
-	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _frictionCoeff:float=0.2) -> None:
+	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _frictionCoeff:float=0.1) -> None:
 		self.pos = _pos
 		self.vel = _vel
 		self.heading = _heading
 		self.frictionCoeff = _frictionCoeff
-		self.accInertia = 0.0
 		self.rotInertia = 0.0
-		self.maxSpeed = 10
+		self.gearing = 5
+		self.maxSpeed = self.gearings[self.gearing][0]
+		self.accMult = self.gearings[self.gearing][1]
 		self.inputs = { # lowercase represents the input inertia, capital the condition of the key
 			'W': False,
 			'A': False,
@@ -43,33 +47,54 @@ class RacingCar:
 			'Q': False,
 			'E': False,
 		}
+	
+	def _recalcGearing(self) -> None:
+		self.maxSpeed = self.gearings[self.gearing][0]
+		self.accMult = self.gearings[self.gearing][1]
+	
+	def _handleBounds(self) -> None:
+		pos = self.pos
+		vel = self.vel
+		if pos[0] < -960:
+			pos = Vec2D(-960, pos[1])
+			vel = Vec2D(0, vel[1])
+		elif pos[0] > 960:
+			pos = Vec2D(960, pos[1])
+			vel = Vec2D(0, vel[1])
+		if pos[1] < -540:
+			pos = Vec2D(pos[0], -540)
+			vel = Vec2D(vel[0], 0)
+		elif pos[1] > 540:
+			pos = Vec2D(pos[0], 540)
+			vel = Vec2D(vel[0], 0)
+		self.pos = pos
+		self.vel = vel
 
 	def _step(self) -> None:
 		inputs = self.inputs
 		# Input inertia step
-		fd = int(inputs['W'])-int(inputs['S']) * 0.01
-		if fd != 0:
-			self.accInertia += fd if fd + self.accInertia <= 2 and fd + self.accInertia >= -1 else 0 
-		else:
-			self.accInertia = 0
-		rot = (int(inputs['A'])-int(inputs['D'])) * 0.5 * abs(self.accInertia)
-		if rot != 0:
-			self.rotInertia += rot if rot + self.rotInertia <= 6 and rot + self.rotInertia >= -6 else 0 
-		else:
-			self.rotInertia = 0
+		fd = int(inputs['W'])-int(inputs['S']) * 0.01 * self.accMult
+		rot = (int(inputs['A'])-int(inputs['D'])) * 5 * self.accMult
+		print(self.rotInertia)
+		self.rotInertia += rot
+		self.rotInertia = self.rotInertia if self.rotInertia <= 60 else 60
+		self.rotInertia = self.rotInertia if self.rotInertia >= -60 else -60
 
 		# Actual physics step
-		acc = vRotate((self.accInertia, 0), self.heading)
-		#print(str(acc))
-		acc -= self.vel * (self.frictionCoeff/(vMag(self.vel) + 1))
-		acc -= self.vel * 0.5 * math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
-		self.heading += self.rotInertia
+		acc = vRotate((fd, 0), self.heading)
+		acc -= self.vel * self.frictionCoeff
+		angleMult = math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
+		acc -= self.vel * 0.1 * angleMult
+		self.heading += self.rotInertia*0.1
 		self.vel += acc
 		if vMag(self.vel) > self.maxSpeed:
 			self.vel = vNorm(self.vel, self.maxSpeed)
 		self.pos += self.vel
+		self._handleBounds()
+		if self.rotInertia != 0:
+			self.rotInertia = math.floor(self.rotInertia - sign(self.rotInertia))
 		
-	def draw(self, trtl:Turtle, echo:list[Turtle]) -> None:
+	def draw(self, trtl:Turtle, echo:list[Turtle] = None) -> None:
 		if echo is not None:
 			newPos = self.pos
 			newHeading = self.heading
@@ -86,9 +111,10 @@ class RacingCar:
 
 	def inputChanged(self, key:str, val:bool) -> None:
 		self.inputs[key] = val
-		#print(key)
 		if val:
 			if key == 'Q':
-				self.maxSpeed -= 1 if self.maxSpeed > 0 else 0
+				self.gearing -= 1 if self.gearing > 0 else 0
+				self._recalcGearing()
 			elif key == 'E':
-				self.maxSpeed += 1 if self.maxSpeed < 35 else 0
+				self.maxSpeed += 1 if self.maxSpeed + 1 < len(self.gearings) else 0
+				self._recalcGearing()

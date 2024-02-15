@@ -10,6 +10,7 @@ screen.setup(1920, 1080)
 screen.bgpic("track01.png")
 trtl = Turtle()
 trtl.speed(0)
+trtl.color("blue")
 trtl.pu()
 rc = RacingCar()
 inputs = {
@@ -20,19 +21,18 @@ inputs = {
 	'Q': False,
 	'E': False,
 }
-echos = []
+"""echos = []
 for col in range(175, 239, 16):
 	c = '%X' % col
 	t = Turtle()
 	t.pu()
 	t.color(f"#{c}{c}{c}")
-	echos.append(t)
+	echos.append(t)"""
 
 def genKF(key:str, val:bool):
 	def f():
 		keyVal = inputs[key]
 		if keyVal != val:
-			print(key)
 			globals()['inputs'][key] = val
 			rc.inputChanged(key, val)
 	return f
@@ -48,7 +48,7 @@ for i,f in enumerate(krFunctions):
 	screen.onkeyrelease(f, keys[i])
 
 def screenUpdate():
-	rc.draw(trtl, echos)
+	rc.draw(trtl)
 	screen.ontimer(screenUpdate, 20)
 
 screen.listen()
