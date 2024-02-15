@@ -1,5 +1,5 @@
 import turtle
-from random import randint
+import random
 
 screen = turtle.Screen()
 screen.setup(600, 600)
@@ -8,12 +8,29 @@ trtl = turtle.Turtle()
 trtl.speed(0)
 
 width = 20
+lastDoors = [0, 0, 0, 0]
+
+def genBarrierPos(doorPos, lastDoor, len) -> int:
+	posList:list = list(range(width, len-width))
+	for i in range(doorPos, doorPos+width):
+		try:
+			posList.remove(i)
+		except ValueError:
+			pass
+	for i in range(lastDoor, lastDoor+width):
+		try:
+			posList.remove(i)
+		except ValueError:
+			pass
+	return random.choice(posList)
+
 for i in range(width, 400, int(width*0.5)):
 	trtl.pd()
 	if i > 3*width:
-		doorPos = randint(0, i-width)
-		barrierPos = randint(width, i-width)
-		barrierPos = barrierPos if barrierPos <= doorPos or barrierPos >= (doorPos+width) else doorPos
+		lastDoor = lastDoors.pop(0)
+		doorPos = random.randint(0, i-width)
+		barrierPos = genBarrierPos(doorPos, lastDoor, i)
+		lastDoors.append(doorPos+width)
 		# Door
 		trtl.fd(doorPos)
 		trtl.pu()
@@ -22,14 +39,14 @@ for i in range(width, 400, int(width*0.5)):
 		trtl.fd(i-(doorPos+width))
 		# Barrier
 		trtl.pu()
-		trtl.bk(barrierPos)
+		trtl.bk(i-barrierPos)
 		trtl.rt(90)
 		trtl.pd()
 		trtl.fd(width)
 		trtl.pu()
 		trtl.bk(width)
 		trtl.lt(90)
-		trtl.fd(barrierPos)
+		trtl.fd(i-barrierPos)
 	else:
 		trtl.fd(i)
 	trtl.rt(90)
