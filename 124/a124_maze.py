@@ -98,7 +98,34 @@ def setup():
 		drawTrtl.rt(90)
 	drawTrtl.fd(420)
 	drawTrtl.ht()
-		
+
+def gameContinue():
+	x = globals()['x']
+	y = globals()['y'] + 20
+	if (abs(x) > 210 or abs(y) > 210) and game:
+		globals()['game'] = False
+		time = '{0:.2f}'.format(timer/1000)
+		while True:
+			response = screen.textinput("A124", f"You finished with a time of {time} secs. Try again? (y/n)")
+			if response == 'y' or response == 'Y':
+				globals()['timer'] = 0
+				setup()
+				globals()['inputs'] = {
+					'w': False,
+					'a': False,
+					's': False,
+					'd': False,
+					'Up': False,
+					'Down': False,
+					'Left': False,
+					'Right': False,
+				}
+				globals()['game'] = True
+				screen.listen()
+				return
+			elif response == 'n' or response == 'N':
+				exit()
+
 def getAngle(vector:tuple) -> int:
 	match vector:
 		case (-1, -1):
@@ -123,12 +150,15 @@ def getAngle(vector:tuple) -> int:
 
 def gameLoop():
 	screen.ontimer(gameLoop, 50)
-	vertical = int(inputs['w'] or inputs['Up']) - int(inputs['s'] or inputs['Down'])
-	horizontal = int(inputs['d'] or inputs['Right']) - int(inputs['a'] or inputs['Left'])
-	mazeTrtl.seth(getAngle((horizontal, vertical)))
-	mazeTrtl.goto(mazeTrtl.xcor() + 3*horizontal, mazeTrtl.ycor() + 3*vertical)
-	globals()['x'] += 3*horizontal
-	globals()['y'] += 3*vertical
+	if game:
+		globals()['timer'] += 50
+		vertical = int(inputs['w'] or inputs['Up']) - int(inputs['s'] or inputs['Down'])
+		horizontal = int(inputs['d'] or inputs['Right']) - int(inputs['a'] or inputs['Left'])
+		mazeTrtl.seth(getAngle((horizontal, vertical)))
+		mazeTrtl.goto(mazeTrtl.xcor() + 3*horizontal, mazeTrtl.ycor() + 3*vertical)
+		globals()['x'] += 3*horizontal
+		globals()['y'] += 3*vertical
+		gameContinue()
 
 setup()
 game = True
