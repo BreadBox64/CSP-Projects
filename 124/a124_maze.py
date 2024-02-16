@@ -16,6 +16,35 @@ game = False
 x = 0
 y = 0 #trtl coords dont work
 
+inputs = {
+	'w': False,
+	'a': False,
+	's': False,
+	'd': False,
+	'Up': False,
+	'Down': False,
+	'Left': False,
+	'Right': False,
+}
+# This is copied from my 1.2.5 because this is easier and better than setting it up manually
+screen.listen()
+def genKF(key:str, val:bool):
+	def f():
+		keyVal = inputs[key]
+		if keyVal != val:
+			globals()['inputs'][key] = val
+	return f
+keys = ['w', 'a', 's', 'd', 'Up', 'Down', 'Left', 'Right']
+kpFunctions = []
+krFunctions = []
+for key in keys:
+	kpFunctions.append(genKF(key, True))
+	krFunctions.append(genKF(key, False))
+for i,f in enumerate(kpFunctions):
+	screen.onkeypress(f, keys[i])
+for i,f in enumerate(krFunctions):
+	screen.onkeyrelease(f, keys[i])
+
 width = 20
 
 def genBarrierPos(doorPos:int, lastDoor:int, len:int) -> int:
@@ -68,8 +97,37 @@ def setup():
 			drawTrtl.fd(i)
 		drawTrtl.rt(90)
 	drawTrtl.fd(420)
-	drawTrtl.ht()
+	drawTrtl.ht()		
+
+def getAngle(vector:tuple) -> int:
+	match vector:
+		case (-1, -1):
+			return 225
+		case (-1, 0):
+			return 180
+		case (-1, 1):
+			return 135
+		case (0, -1):
+			return 270
+		case (0, 0):
+			return mazeTrtl.heading()
+		case (0, 1):
+			return 90
+		case (1, -1):
+			return 315
+		case (1, 0):
+			return 0
+		case (1, 1):
+			return 45
+	return None # Passed an invalid vector
+
+def gameLoop():
+	screen.ontimer(gameLoop, 50)
+	vertical = int(inputs['w'] or inputs['Up']) - int(inputs['s'] or inputs['Down'])
+	horizontal = int(inputs['d'] or inputs['Right']) - int(inputs['a'] or inputs['Left'])
+	mazeTrtl.seth(getAngle((horizontal, vertical)))
 
 setup()
+screen.ontimer(gameLoop, 50)
 screen.listen()
 screen.mainloop()
