@@ -97,8 +97,8 @@ def setup():
 			drawTrtl.fd(i)
 		drawTrtl.rt(90)
 	drawTrtl.fd(420)
-	drawTrtl.ht()		
-
+	drawTrtl.ht()
+		
 def getAngle(vector:tuple) -> int:
 	match vector:
 		case (-1, -1):
@@ -126,8 +126,12 @@ def gameLoop():
 	vertical = int(inputs['w'] or inputs['Up']) - int(inputs['s'] or inputs['Down'])
 	horizontal = int(inputs['d'] or inputs['Right']) - int(inputs['a'] or inputs['Left'])
 	mazeTrtl.seth(getAngle((horizontal, vertical)))
+	mazeTrtl.goto(mazeTrtl.xcor() + 3*horizontal, mazeTrtl.ycor() + 3*vertical)
+	globals()['x'] += 3*horizontal
+	globals()['y'] += 3*vertical
 
 setup()
+game = True
 screen.ontimer(gameLoop, 50)
 screen.listen()
 screen.mainloop()
