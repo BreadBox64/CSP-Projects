@@ -1,5 +1,6 @@
 from PIL import Image
 from math import floor
+from turtle import _Screen
 
 frictionCoeffs = {
 	(0, 0, 0, 255): 0.15,
@@ -43,13 +44,26 @@ class Track:
 
 class TrackManager:
 	tracks:list[Track]
+	imgs:list[str]
 	index:int
+	timer:int
+	lapTimes:list[int]
 	
 	def __init__(self, fileList:list[str]) -> None:
 		self.tracks = []
+		self.imgs = []
 		for file in fileList:
-			self.tracks.append(Track(file))
+			self.tracks.append(Track(f"track{file}small.png"))
+			self.imgs.append(f"track{file}.png")
 		self.index = 0
+		self.timer = 0
+
+	def lap(self) -> None:
+		self.lapTimes.append(self.timer)
+		self.timer = 0
+
+	def screenRefresh(self, screen:_Screen):
+		screen.bgpic(self.imgs[self.index])
 
 	def index(self, newIndex:int) -> None:
 		self.index = newIndex
@@ -60,13 +74,13 @@ class TrackManager:
 	def get(self, index:int) -> Track:
 		return self.tracks[index]
 	
-	def lap(self, x:int|tuple, y:int=None) -> bool:
+	def event(self, x:int|tuple, y:int=None) -> int:
 		if y is None:
 			y = x[1]
 			x = x[0]
 		x = floor(0.1*x + 96)
 		y = floor(-0.1*y + 96)
-		return (self.current().getEventAtPoint(x, y) == 1)
+		return self.current().getEventAtPoint(x, y)
 	
 	def coeff(self, x:int|tuple, y:int=None) -> float:
 		if y is None:
