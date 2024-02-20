@@ -1,5 +1,6 @@
 from turtle import *
 from RacingCar import *
+from TrackManager import *
 import os
 #import TrackManager
 
@@ -12,7 +13,8 @@ trtl = Turtle()
 trtl.speed(0)
 trtl.color("blue")
 trtl.pu()
-rc = RacingCar()
+tm = TrackManager(["track01small.png"])
+rc = RacingCar(_trackManager = tm)
 inputs = {
 	'W': False,
 	'A': False,
@@ -20,14 +22,8 @@ inputs = {
 	'D': False,
 	'Q': False,
 	'E': False,
+	'Space': False,
 }
-"""echos = []
-for col in range(175, 239, 16):
-	c = '%X' % col
-	t = Turtle()
-	t.pu()
-	t.color(f"#{c}{c}{c}")
-	echos.append(t)"""
 
 def genKF(key:str, val:bool):
 	def f():
@@ -38,7 +34,7 @@ def genKF(key:str, val:bool):
 	return f
 kpFunctions = []
 krFunctions = []
-keys = ['w', 'a', 's', 'd', 'q', 'e']
+keys = ['w', 'a', 's', 'd', 'q', 'e', 'space']
 for key in keys:
 	kpFunctions.append(genKF(key.capitalize(), True))
 	krFunctions.append(genKF(key.capitalize(), False))

@@ -1,5 +1,6 @@
 import math
 from turtle import *
+from TrackManager import TrackManager
 
 sign = lambda x: math.copysign(1, x)
 
@@ -20,7 +21,6 @@ def vNorm(vec:Vec2D, len:float) -> Vec2D:
 	return vec * (len/vMag(vec))
 
 class RacingCar:
-	frictionCoeff:float
 	pos:Vec2D
 	vel:Vec2D
 	accInertia:int
@@ -30,11 +30,10 @@ class RacingCar:
 	gearing:int
 	gearings = [[5, 5.0], [8, 3.5], [12, 2.5], [16, 1.75], [18, 1.2], [20, 1.0], [25, 0.9], [30, 0.8], [35, 0.75]]
 	
-	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _frictionCoeff:float=0.1) -> None:
+	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _trackManager:TrackManager=None) -> None:
 		self.pos = _pos
 		self.vel = _vel
 		self.heading = _heading
-		self.frictionCoeff = _frictionCoeff
 		self.rotInertia = 0.0
 		self.gearing = 5
 		self.maxSpeed = self.gearings[self.gearing][0]
@@ -46,7 +45,12 @@ class RacingCar:
 			'D': False,
 			'Q': False,
 			'E': False,
+			'Space': False,
 		}
+		if _trackManager is None:
+			self.frictionCoeff = lambda _: 0.1
+		else:
+			self.frictionCoeff = _trackManager.coeff
 	
 	def _recalcGearing(self) -> None:
 		self.maxSpeed = self.gearings[self.gearing][0]
@@ -73,26 +77,29 @@ class RacingCar:
 	def _step(self) -> None:
 		inputs = self.inputs
 		# Input inertia step
-		fd = int(inputs['W'])-int(inputs['S']) * 0.01 * self.accMult
-		rot = (int(inputs['A'])-int(inputs['D'])) * 5 * self.accMult
-		print(self.rotInertia)
+		fd = int(inputs['W'])-int(inputs['S']) * 0.005 * self.accMult
+		print(int(inputs['Space']))
+		rot = (int(inputs['A'])-int(inputs['D'])) * 2 * int(inputs['W'])-int(inputs['S']) * self.accMult
+		#print(self.rotInertia)
 		self.rotInertia += rot
 		self.rotInertia = self.rotInertia if self.rotInertia <= 60 else 60
 		self.rotInertia = self.rotInertia if self.rotInertia >= -60 else -60
 
 		# Actual physics step
 		acc = vRotate((fd, 0), self.heading)
-		acc -= self.vel * self.frictionCoeff
+		frictionCoeff = self.frictionCoeff(self.pos)
+		#print(f"{self.pos} - {self.frictionCoeff(self.pos)}")
+		acc -= self.vel * frictionCoeff
 		angleMult = math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
 		acc -= self.vel * 0.1 * angleMult
-		self.heading += self.rotInertia*0.1
+		self.heading += self.rotInertia*0.1*(1+int(inputs['Space']))
 		self.vel += acc
 		if vMag(self.vel) > self.maxSpeed:
 			self.vel = vNorm(self.vel, self.maxSpeed)
 		self.pos += self.vel
 		self._handleBounds()
 		if self.rotInertia != 0:
-			self.rotInertia = math.floor(self.rotInertia - sign(self.rotInertia))
+			self.rotInertia = sign(self.rotInertia) * math.floor(abs(self.rotInertia) - 1)
 		
 	def draw(self, trtl:Turtle, echo:list[Turtle] = None) -> None:
 		if echo is not None:
