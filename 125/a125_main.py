@@ -4,20 +4,26 @@ from TrackManager import *
 import os
 
 screen = Screen()
-screen.setworldcoordinates(-960, -580, 960, 580)
-screen.setup(1920, 1080)
-screen.delay(0)
+width, height = (1920, 1080)
+halfWidth, halfHeight = (960, 540)
+screen.setup(width, height)
+screen.tracer(False)
+#screen.delay(0)
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 trtl = Turtle()
 trtl.speed(0)
-trtl.color("blue")
+trtl.color("#5555FF")
+trtl.pencolor("#AAAAAA")
+trtl.resizemode("user")
+trtl.shapesize(2, 2, 2)
 trtl.pu()
 writer = Turtle()
 writer.speed(0)
-writer.goto(0, 400)
-tm = TrackManager(["02"], writer)
+writer.ht()
+writer.pencolor("#FFFFFF")
+tm = TrackManager(["02"])
 tm.screenRefresh(screen)
-rc = RacingCar(Vec2D(0, -50), _trackManager = tm)
+rc = RacingCar(Vec2D(-64, 96 - halfHeight), _trackManager = tm)
 inputs = {}
 
 def implementKeys(keys):
@@ -44,6 +50,9 @@ def implementKeys(keys):
 def screenUpdate():
 	tm.timer += 20
 	rc.draw(trtl)
+	writer.clear()
+	writer.write(f"Time: {'{0:.2f}'.format(tm.timer/1000)}\nG{str(rc.gearing)} [MS: {rc.maxSpeed}, AM {rc.accMult}]\n\n{tm.outputText}", font=("Arial", 24, "bold"))
+	screen.update()
 	screen.ontimer(screenUpdate, 20)
 
 implementKeys(['w', 'a', 's', 'd', 'q', 'e', 'space'])

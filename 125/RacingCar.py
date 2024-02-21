@@ -23,12 +23,10 @@ def vNorm(vec:Vec2D, len:float) -> Vec2D:
 class RacingCar:
 	pos:Vec2D
 	vel:Vec2D
-	accInertia:int
-	rotInertia:int
 	heading:float
 	inputs:dict
 	gearing:int
-	gearings = [[5, 5.0], [8, 3.5], [12, 2.5], [16, 1.75], [18, 1.2], [20, 1.0], [25, 0.9], [30, 0.8], [35, 0.75]]
+	gearings = [[5, 5.0], [8, 3.5], [12, 2.5], [16, 1.75], [20, 1.2], [25, 1.0], [30, 0.9], [40, 0.8], [50, 0.75]]
 	trackManager:TrackManager
 	
 	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _trackManager:TrackManager=None) -> None:
@@ -58,24 +56,11 @@ class RacingCar:
 	def _recalcGearing(self) -> None:
 		self.maxSpeed = self.gearings[self.gearing][0]
 		self.accMult = self.gearings[self.gearing][1]
-	
+
 	def _handleBounds(self) -> None:
-		pos = self.pos
-		vel = self.vel
-		if pos[0] < -960:
-			pos = Vec2D(-960, pos[1])
-			vel = Vec2D(0, vel[1])
-		elif pos[0] > 960:
-			pos = Vec2D(960, pos[1])
-			vel = Vec2D(0, vel[1])
-		if pos[1] < -540:
-			pos = Vec2D(pos[0], -540)
-			vel = Vec2D(vel[0], 0)
-		elif pos[1] > 540:
-			pos = Vec2D(pos[0], 540)
-			vel = Vec2D(vel[0], 0)
-		self.pos = pos
-		self.vel = vel
+		if abs(self.pos[0]) >= 960 or abs(self.pos[1]) >= 540:
+			self.pos = Vec2D(64, -444)
+			self.vel = Vec2D(0, 0)
 
 	def _handleEvents(self) -> None:
 		if self.trackManager:
@@ -86,38 +71,32 @@ class RacingCar:
 				case 0:
 					return
 				case 1:
-					pass #tm.lap()
+					if tm.lappingEnabled:
+						tm.lap()
 				case 2:
-					pass #tm.fail()
+					self.pos = Vec2D(64, -444)
+					self.vel = Vec2D(0, 0)
+				case 3:
+					tm.lappingEnabled = True
 
 	def _step(self) -> None:
 		inputs = self.inputs
-		# Input inertia step
 		fd = int(inputs['W'])-int(inputs['S']) * 0.005 * self.accMult
-		#print(int(inputs['Space']))
-		rot = (int(inputs['A'])-int(inputs['D'])) * (1+int(inputs['Space'])) * int(inputs['W'])-int(inputs['S']) * self.accMult
-		#print(self.rotInertia)
-		self.rotInertia += rot
-		self.rotInertia = self.rotInertia if self.rotInertia <= 60 else 60
-		self.rotInertia = self.rotInertia if self.rotInertia >= -60 else -60
+		rot = (int(inputs['A'])-int(inputs['D'])) * int(inputs['W'])-int(inputs['S']) * self.accMult
 
-		# Actual physics step
+		self.heading += rot*(1.5+int(inputs['Space']))
 		acc = vRotate((fd, 0), self.heading)
 		frictionCoeff = self.frictionCoeff(self.pos)
-		#print(f"{self.pos} - {self.frictionCoeff(self.pos)}")
 		acc -= self.vel * frictionCoeff
 		angleMult = math.sin(math.radians(abs(self.heading - vHeading(self.vel))))
-		acc -= self.vel * 0.1 * angleMult
-		self.heading += self.rotInertia*0.1*(1+0.4*int(inputs['Space']))
+		acc -= self.vel * 0.15 * angleMult
 		self.vel += acc
 		if vMag(self.vel) > self.maxSpeed:
 			self.vel = vNorm(self.vel, self.maxSpeed)
 		self.pos += self.vel
 		self._handleBounds()
 		self._handleEvents()
-		if self.rotInertia != 0:
-			self.rotInertia = sign(self.rotInertia) * math.floor(abs(self.rotInertia) - 1)
-		
+
 	def draw(self, trtl:Turtle, echo:list[Turtle] = None) -> None:
 		if echo is not None:
 			newPos = self.pos
@@ -140,5 +119,5 @@ class RacingCar:
 				self.gearing -= 1 if self.gearing > 0 else 0
 				self._recalcGearing()
 			elif key == 'E':
-				self.maxSpeed += 1 if self.maxSpeed + 1 < len(self.gearings) else 0
+				self.gearing += 1 if self.gearing + 1 < len(self.gearings) else 0
 				self._recalcGearing()
