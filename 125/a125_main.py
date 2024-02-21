@@ -2,17 +2,20 @@ from turtle import *
 from RacingCar import *
 from TrackManager import *
 import os
-#import TrackManager
 
 screen = Screen()
+screen.setworldcoordinates(-960, -580, 960, 580)
+screen.setup(1920, 1080)
 screen.delay(0)
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-screen.setup(1920, 1080)
 trtl = Turtle()
 trtl.speed(0)
 trtl.color("blue")
 trtl.pu()
-tm = TrackManager(["02"])
+writer = Turtle()
+writer.speed(0)
+writer.goto(0, 400)
+tm = TrackManager(["02"], writer)
 tm.screenRefresh(screen)
 rc = RacingCar(Vec2D(0, -50), _trackManager = tm)
 inputs = {}

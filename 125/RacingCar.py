@@ -94,7 +94,7 @@ class RacingCar:
 		inputs = self.inputs
 		# Input inertia step
 		fd = int(inputs['W'])-int(inputs['S']) * 0.005 * self.accMult
-		print(int(inputs['Space']))
+		#print(int(inputs['Space']))
 		rot = (int(inputs['A'])-int(inputs['D'])) * (1+int(inputs['Space'])) * int(inputs['W'])-int(inputs['S']) * self.accMult
 		#print(self.rotInertia)
 		self.rotInertia += rot

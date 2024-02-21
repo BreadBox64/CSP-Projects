@@ -1,6 +1,6 @@
 from PIL import Image
 from math import floor
-from turtle import _Screen
+from turtle import _Screen,Turtle
 
 frictionCoeffs = {
 	(0, 0, 0, 255): 0.15,
@@ -21,6 +21,8 @@ events = {
 	(128, 0, 0, 255): 0,
 	(255, 0, 0, 255): 1,
 }
+
+font = ("Arial", 10, "normal")
 
 class Track:
 	img:Image.Image
@@ -48,8 +50,9 @@ class TrackManager:
 	index:int
 	timer:int
 	lapTimes:list[int]
+	trtl:Turtle
 	
-	def __init__(self, fileList:list[str]) -> None:
+	def __init__(self, fileList:list[str], _trtl:Turtle) -> None:
 		self.tracks = []
 		self.imgs = []
 		for file in fileList:
@@ -57,13 +60,19 @@ class TrackManager:
 			self.imgs.append(f"track{file}.png")
 		self.index = 0
 		self.timer = 0
+		self.trtl = _trtl
 
 	def lap(self) -> None:
 		self.lapTimes.append(self.timer)
 		self.timer = 0
+		self.display(self.trtl)
 
-	def screenRefresh(self, screen:_Screen):
+	def screenRefresh(self, screen:_Screen) -> None:
 		screen.bgpic(self.imgs[self.index])
+	
+	def display(self, trtl:Turtle) -> None:
+		trtl.clear()
+		trtl.write(f"", False, "center", font)
 
 	def index(self, newIndex:int) -> None:
 		self.index = newIndex
