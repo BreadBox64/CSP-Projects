@@ -120,6 +120,7 @@ class TrackManager:
 		if y is None:
 			y = x[1]
 			x = x[0]
+		y *= -1
 		x = floor((x + self.scale[3])/self.scale[0])
 		y = floor((y + self.scale[4])/self.scale[0])
 		return self.current().getEventAtPoint(x, y)
@@ -128,6 +129,7 @@ class TrackManager:
 		if y is None:
 			y = x[1]
 			x = x[0]
+		y *= -1
 		x = floor((x + self.scale[3])/self.scale[0])
 		y = floor((y + self.scale[4])/self.scale[0])
 		return self.current().getCoeffAtPoint(x, y)

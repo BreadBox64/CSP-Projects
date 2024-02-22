@@ -1,12 +1,15 @@
 from turtle import *
 from RacingCar import *
 from TrackManager import *
-from math import floor
 import os
+# screensize getter is from https://stackoverflow.com/a/3129524
+import ctypes
+user32 = ctypes.windll.user32
+wWidth = user32.GetSystemMetrics(0)
+wHeight = user32.GetSystemMetrics(1)
 
 screen = Screen()
-screen.setup(1.0, 1.0)
-base = min(floor(screen.window_width()/192), floor(screen.window_height()/108))
+base = min(int((wWidth-(wWidth%192))/192), int((wHeight-(wHeight%108))/108))
 width, height = (base * 192, base * 108)
 halfWidth, halfHeight = (base * 96, base * 54)
 scale = (base, width, height, halfWidth, halfHeight)
