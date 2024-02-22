@@ -1,11 +1,15 @@
 from turtle import *
 from RacingCar import *
 from TrackManager import *
+from math import floor
 import os
 
 screen = Screen()
-width, height = (1920, 1080)
-halfWidth, halfHeight = (960, 540)
+screen.setup(1.0, 1.0)
+base = min(floor(screen.window_width()/192), floor(screen.window_height()/108))
+width, height = (base * 192, base * 108)
+halfWidth, halfHeight = (base * 96, base * 54)
+scale = (base, width, height, halfWidth, halfHeight)
 screen.setup(width, height)
 screen.tracer(False)
 #screen.delay(0)
@@ -21,9 +25,9 @@ writer = Turtle()
 writer.speed(0)
 writer.ht()
 writer.pencolor("#FFFFFF")
-tm = TrackManager(["02"])
+tm = TrackManager(scale, ["02"])
 tm.screenRefresh(screen)
-rc = RacingCar(Vec2D(-64, 96 - halfHeight), _trackManager = tm)
+rc = RacingCar(scale, Vec2D(-4*base, (10*base) - halfHeight), _trackManager = tm)
 inputs = {}
 
 def implementKeys(keys):
@@ -51,7 +55,7 @@ def screenUpdate():
 	tm.timer += 20
 	rc.draw(trtl)
 	writer.clear()
-	writer.write(f"Time: {'{0:.2f}'.format(tm.timer/1000)}\nG{str(rc.gearing)} [MS: {rc.maxSpeed}, AM {rc.accMult}]\n\n{tm.outputText}", font=("Arial", 24, "bold"))
+	writer.write(f"Time: {'{0:.2f}'.format(tm.timer/1000)}\nG{str(rc.gearing)} [MS: {rc.maxSpeed}, AM {rc.accMult}]\n\n{tm.outputText}", font=("Arial", 2*base, "bold"))
 	screen.update()
 	screen.ontimer(screenUpdate, 20)
 
