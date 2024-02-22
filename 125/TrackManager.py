@@ -1,6 +1,7 @@
 from PIL import Image
 from math import floor
-from turtle import _Screen,Turtle
+from turtle import _Screen
+from os import path
 
 frictionCoeffs = { #includes all colors
 	(0, 0, 0, 255): 0.5,
@@ -28,16 +29,15 @@ class Track:
 
 	def __init__(self, imagePath:str) -> None:
 		img = Image.open(imagePath, 'r')
-		self.width, self.height = img.size
 		self.img = img
 		self.pixelValues = list(img.getdata())
 
 	def getCoeffAtPoint(self, x:int, y:int) -> float:
-		color = self.pixelValues[self.width*y+x]
+		color = self.pixelValues[192*y+x]
 		return frictionCoeffs.get(color, 0.15)
 	
 	def getEventAtPoint(self, x:int, y:int) -> int:
-		color = self.pixelValues[self.width*y+x]
+		color = self.pixelValues[192*y+x]
 		return events.get(color, 0)
 
 class TrackManager:
@@ -51,13 +51,19 @@ class TrackManager:
 	fileList:list[str]
 	lappingEnabled:bool
 	newMap:bool
+	scale:list[int]
 	
-	def __init__(self, fileList:list[str]) -> None:
+	def __init__(self, scale:list[int], fileList:list[str]) -> None:
 		self.tracks = []
 		self.imgs = []
+		self.scale = scale
 		for file in fileList:
-			self.tracks.append(Track(f"track{file}small.png"))
-			self.imgs.append(f"track{file}.png")
+			self.tracks.append(Track(f"track{file}.png"))
+			scaleImg = f"track{file}_{scale[0]}.png"
+			if not path.isfile(scaleImg):
+				img = Image.open(f"track{file}.png")
+				img.resize((192*scale[0], 108*scale[0]), Image.Resampling.NEAREST).save(scaleImg)
+			self.imgs.append(scaleImg)
 		self.index = 0
 		self.timer = 0
 		self.outputText = "No Scores Yet!"
@@ -114,14 +120,16 @@ class TrackManager:
 		if y is None:
 			y = x[1]
 			x = x[0]
-		x = floor(0.1*x) + 96
-		y = floor(-0.1*y) + 54
+		y *= -1
+		x = floor((x + self.scale[3])/self.scale[0])
+		y = floor((y + self.scale[4])/self.scale[0])
 		return self.current().getEventAtPoint(x, y)
 	
 	def coeff(self, x:int|tuple, y:int=None) -> float:
 		if y is None:
 			y = x[1]
 			x = x[0]
-		x = floor(0.1*x) + 96
-		y = floor(-0.1*y) + 54
+		y *= -1
+		x = floor((x + self.scale[3])/self.scale[0])
+		y = floor((y + self.scale[4])/self.scale[0])
 		return self.current().getCoeffAtPoint(x, y)

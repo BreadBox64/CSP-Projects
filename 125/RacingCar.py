@@ -28,8 +28,9 @@ class RacingCar:
 	gearing:int
 	gearings = [[5, 5.0], [8, 3.5], [12, 2.5], [16, 1.75], [20, 1.2], [25, 1.0], [30, 0.9], [40, 0.8], [50, 0.75]]
 	trackManager:TrackManager
+	scale:list[int]
 	
-	def __init__(self, _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _trackManager:TrackManager=None) -> None:
+	def __init__(self, _scale:list[int], _pos:Vec2D=Vec2D(0, 0), _vel:Vec2D=Vec2D(0, 0), _heading:float=0.0, _trackManager:TrackManager=None) -> None:
 		self.pos = _pos
 		self.vel = _vel
 		self.heading = _heading
@@ -46,6 +47,7 @@ class RacingCar:
 			'E': False,
 			'Space': False,
 		}
+		self.scale = _scale
 		if _trackManager is None:
 			self.frictionCoeff = lambda _: 0.1
 			self.trackManager = False
@@ -58,8 +60,8 @@ class RacingCar:
 		self.accMult = self.gearings[self.gearing][1]
 
 	def _handleBounds(self) -> None:
-		if abs(self.pos[0]) >= 960 or abs(self.pos[1]) >= 540:
-			self.pos = Vec2D(64, -444)
+		if abs(self.pos[0]) >= self.scale[3] or abs(self.pos[1]) >= self.scale[4]:
+			self.pos = Vec2D(4*self.scale[0], (10*self.scale[0])-self.scale[4])
 			self.vel = Vec2D(0, 0)
 
 	def _handleEvents(self) -> None:
@@ -74,7 +76,7 @@ class RacingCar:
 					if tm.lappingEnabled:
 						tm.lap()
 				case 2:
-					self.pos = Vec2D(64, -444)
+					self.pos = Vec2D(4*self.scale[0], (10*self.scale[0])-self.scale[4])
 					self.vel = Vec2D(0, 0)
 				case 3:
 					tm.lappingEnabled = True
@@ -93,7 +95,7 @@ class RacingCar:
 		self.vel += acc
 		if vMag(self.vel) > self.maxSpeed:
 			self.vel = vNorm(self.vel, self.maxSpeed)
-		self.pos += self.vel
+		self.pos += self.vel * (self.scale[0]/10)
 		self._handleBounds()
 		self._handleEvents()
 
