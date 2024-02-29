@@ -1,10 +1,16 @@
 #   a212_rsa_decrypt.py
 import rsa as rsa
 
-key = int(input("Enter the Decryption Key: " ))
-mod_value = int(input("Enter the Modulus: " ))
-encrypted_msg = input("What message would you like to decrypt (No brackets): ")
-
-#break apart the list that is cut/copied over on ", "
-msg = encrypted_msg.split(", ")
-print (rsa.decrypt(key,mod_value , msg))
+key:int
+modulus:int
+while True:
+	try:
+		key = int(input("Enter the Encryption Key: "))
+		assert key >= 0
+		modulus = int(input("Enter the Modulus: "))
+		assert modulus >= 0
+		break
+	except (ValueError, AssertionError):
+		print("Invalid input, please only input positive, integer values.")
+plainText = input("Enter a message to encrypt: ")
+print("Decrypted Message:", rsa.decrypt(key, modulus, plainText.split(", ")))
