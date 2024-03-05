@@ -12,5 +12,5 @@ while True:
 		break
 	except (ValueError, AssertionError):
 		print("Invalid input, please only input positive, integer values.")
-plainText = input("Enter a message to encrypt: ")
+plainText = input("Enter a message to decrypt: ")
 print("Decrypted Message:", rsa.decrypt(key, modulus, plainText.split(", ")))
