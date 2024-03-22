@@ -1,28 +1,30 @@
 def monitor():
-  try:
+	try:
+		temps = [50, 55, 60, 65, 70, 75]
+		mesg = "MONITOR-ERROR"
 
-    temps = [50, 55, 60, 65, 70, 75]
+		# get multiple temperature readings
+		temp_readings = get_temps()
+		num_readings = len(temp_readings)
 
-    mesg = "Temperature OK"
+		# sum adds up all items in list
+		ave_temp = sum(temp_readings) / num_readings
 
-    # get multiple temperature readings
-    temp_readings = get_temps()
-    num_readings = 0
+		if (ave_temp < temps[0]):
+			mesg = "Average temperature too cold!"
+		elif (ave_temp > temps[5]):
+			mesg = "Average temperature too warm!"
+		else:
+			mesg = "Temperature OK"
+	except:
+		print("Unexpected error")
 
-    # sum adds up all items in list
-    ave_temp = sum(temp_readings)
-    ave_temp = ave_temp / num_readings
-
-    if (ave_temp < temps[0]):
-      mesg = "Average temperature too cold!"
-    elif (ave_temp > temps[5]):
-      mesg = "Average temperature too warm!"
-    
-  except:
-    print("Unexpected error")
-
-  return mesg
+	return mesg
 
 # Function to simulate actual fish tank monitoring
-def get_temps():
-  return [65, 55, 70] 
+def get_temps() -> list[int, int, int]:
+	#return [10, 20, 35]
+	return [65, 55, 70] 
+	#return [90, 95, 105]
+
+#print(monitor())
